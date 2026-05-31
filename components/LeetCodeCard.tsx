@@ -1,6 +1,7 @@
 "use client";
 
 import useSWR from "swr";
+import { fetcher } from "@/lib/fetcher";
 
 interface LeetCodeStats {
   totalSolved: number;
@@ -14,8 +15,6 @@ interface LeetCodeStats {
   ranking: number;
   contributionPoints: number;
 }
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 function DifficultyBar({
   label,

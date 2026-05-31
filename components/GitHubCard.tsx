@@ -1,6 +1,7 @@
 "use client";
 
 import useSWR from "swr";
+import { fetcher } from "@/lib/fetcher";
 
 interface ContributionDay {
   date: string;
@@ -30,8 +31,6 @@ interface GitHubData {
   repos: GitHubRepo[];
   contributions: ContributionDay[];
 }
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 const LEVEL_COLORS = [
   "bg-slate-800/60",

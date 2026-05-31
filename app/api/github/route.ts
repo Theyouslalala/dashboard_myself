@@ -17,7 +17,7 @@ export async function GET() {
     const [user, repos, contributions] = await Promise.all([
       getGitHubUser(username, token),
       getGitHubRepos(username, token),
-      getContributions(username),
+      getContributions(username, token),
     ]);
 
     return NextResponse.json({
@@ -42,7 +42,10 @@ export async function GET() {
       contributions,
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("GitHub API error:", err);
+    return NextResponse.json(
+      { error: "Failed to fetch GitHub data" },
+      { status: 500 }
+    );
   }
 }

@@ -25,6 +25,7 @@ export interface ContributionDay {
 }
 
 const CACHE_DURATION = 10 * 60 * 1000;
+const MAX_CACHE_SIZE = 50;
 const cache = new Map<string, { data: unknown; timestamp: number }>();
 
 function getCached<T>(key: string): T | null {
@@ -38,6 +39,10 @@ function getCached<T>(key: string): T | null {
 }
 
 function setCache(key: string, data: unknown) {
+  if (cache.size >= MAX_CACHE_SIZE) {
+    const oldest = cache.keys().next().value;
+    if (oldest !== undefined) cache.delete(oldest);
+  }
   cache.set(key, { data, timestamp: Date.now() });
 }
 
@@ -85,16 +90,17 @@ export async function getGitHubRepos(
 }
 
 export async function getContributions(
-  username: string
+  username: string,
+  token?: string
 ): Promise<ContributionDay[]> {
   const cacheKey = `gh_contrib_${username}`;
   const cached = getCached<ContributionDay[]>(cacheKey);
   if (cached) return cached;
 
-  // Use GitHub's contribution calendar via GraphQL (no auth needed for public data)
+  // Use GraphQL variables to prevent injection
   const query = `
-    query {
-      user(login: "${username}") {
+    query ($login: String!) {
+      user(login: $login) {
         contributionsCollection {
           contributionCalendar {
             weeks {
@@ -110,15 +116,18 @@ export async function getContributions(
     }
   `;
 
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
   const res = await fetch("https://api.github.com/graphql", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ query }),
+    headers,
+    body: JSON.stringify({ query, variables: { login: username } }),
   });
 
-  // If GraphQL fails (no auth), generate mock data structure
+  // If GraphQL fails (no auth), generate empty data structure
   if (!res.ok) {
     const days: ContributionDay[] = [];
     const today = new Date();

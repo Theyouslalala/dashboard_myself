@@ -29,11 +29,13 @@ function getEnv(key: string, fallback = ""): string {
   return process.env[key] || fallback;
 }
 
+const VALID_MODES: DashboardMode[] = ["normal", "professional", "gaming"];
+
 export function getConfig(): AppConfig {
-  const mode = (getEnv(
-    "NEXT_PUBLIC_DASHBOARD_MODE",
-    "normal"
-  ) as DashboardMode) || "normal";
+  const rawMode = getEnv("NEXT_PUBLIC_DASHBOARD_MODE", "normal");
+  const mode = VALID_MODES.includes(rawMode as DashboardMode)
+    ? (rawMode as DashboardMode)
+    : "normal";
 
   return {
     steam: {

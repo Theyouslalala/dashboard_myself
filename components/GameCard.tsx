@@ -27,8 +27,11 @@ export default function GameCard({
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           loading="lazy"
           onError={(e) => {
-            (e.target as HTMLImageElement).src =
-              "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='460' height='215' fill='%23111827'%3E%3Crect width='460' height='215'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23374151' font-size='14'%3ENo Image%3C/text%3E%3C/svg%3E";
+            const img = e.target as HTMLImageElement;
+            if (!img.src.startsWith("data:")) {
+              img.src =
+                "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='460' height='215' fill='%23111827'%3E%3Crect width='460' height='215'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23374151' font-size='14'%3ENo Image%3C/text%3E%3C/svg%3E";
+            }
           }}
         />
         <div className="game-card-overlay" />

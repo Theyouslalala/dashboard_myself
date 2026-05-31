@@ -47,7 +47,7 @@ export async function GET() {
         recentGamesCount: recentGames.length,
         recentPlaytime,
       },
-      games: games
+      games: [...games]
         .sort(
           (a, b) => (b.rtime_last_played || 0) - (a.rtime_last_played || 0)
         )
@@ -60,7 +60,10 @@ export async function GET() {
         })),
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Steam API error:", err);
+    return NextResponse.json(
+      { error: "Failed to fetch Steam data" },
+      { status: 500 }
+    );
   }
 }

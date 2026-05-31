@@ -12,6 +12,7 @@ export interface LeetCodeStats {
 }
 
 const CACHE_DURATION = 10 * 60 * 1000;
+const MAX_CACHE_SIZE = 20;
 const cache = new Map<string, { data: unknown; timestamp: number }>();
 
 function getCached<T>(key: string): T | null {
@@ -25,6 +26,10 @@ function getCached<T>(key: string): T | null {
 }
 
 function setCache(key: string, data: unknown) {
+  if (cache.size >= MAX_CACHE_SIZE) {
+    const oldest = cache.keys().next().value;
+    if (oldest !== undefined) cache.delete(oldest);
+  }
   cache.set(key, { data, timestamp: Date.now() });
 }
 
@@ -115,8 +120,8 @@ export async function getLeetCodeStats(
 
     setCache(cacheKey, stats);
     return stats;
-  } catch {
-    // Return default stats if API fails
+  } catch (err) {
+    console.error("LeetCode API error:", err);
     return {
       totalSolved: 0,
       easySolved: 0,

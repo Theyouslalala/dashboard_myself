@@ -29,7 +29,12 @@ export interface SteamPlayerSummaryResponse {
 }
 
 const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+const MAX_CACHE_SIZE = 20;
 const cache = new Map<string, { data: unknown; timestamp: number }>();
+
+function validateSteamId(steamId: string): boolean {
+  return /^\d{17}$/.test(steamId);
+}
 
 function getCached<T>(key: string): T | null {
   const entry = cache.get(key);
@@ -42,6 +47,10 @@ function getCached<T>(key: string): T | null {
 }
 
 function setCache(key: string, data: unknown) {
+  if (cache.size >= MAX_CACHE_SIZE) {
+    const oldest = cache.keys().next().value;
+    if (oldest !== undefined) cache.delete(oldest);
+  }
   cache.set(key, { data, timestamp: Date.now() });
 }
 
@@ -49,6 +58,8 @@ export async function getOwnedGames(
   apiKey: string,
   steamId: string
 ): Promise<SteamGame[]> {
+  if (!validateSteamId(steamId)) throw new Error("Invalid Steam ID format");
+
   const cacheKey = `owned_${steamId}`;
   const cached = getCached<SteamGame[]>(cacheKey);
   if (cached) return cached;
@@ -67,6 +78,8 @@ export async function getPlayerSummary(
   apiKey: string,
   steamId: string
 ): Promise<SteamPlayerSummary | null> {
+  if (!validateSteamId(steamId)) throw new Error("Invalid Steam ID format");
+
   const cacheKey = `summary_${steamId}`;
   const cached = getCached<SteamPlayerSummary | null>(cacheKey);
   if (cached) return cached;
@@ -85,6 +98,8 @@ export async function getRecentlyPlayedGames(
   apiKey: string,
   steamId: string
 ): Promise<SteamGame[]> {
+  if (!validateSteamId(steamId)) throw new Error("Invalid Steam ID format");
+
   const cacheKey = `recent_${steamId}`;
   const cached = getCached<SteamGame[]>(cacheKey);
   if (cached) return cached;
@@ -93,7 +108,7 @@ export async function getRecentlyPlayedGames(
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Steam API error: ${res.status}`);
 
-  const data = await res.json();
+  const data: SteamOwnedGamesResponse = await res.json();
   const games = data.response.games || [];
   setCache(cacheKey, games);
   return games;

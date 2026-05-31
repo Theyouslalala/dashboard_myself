@@ -1,6 +1,7 @@
 "use client";
 
 import useSWR from "swr";
+import { fetcher } from "@/lib/fetcher";
 import GameCard from "./GameCard";
 import StatsChart from "./StatsChart";
 
@@ -24,8 +25,6 @@ interface SteamData {
     lastPlayed?: number;
   }[];
 }
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 function StatBox({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (

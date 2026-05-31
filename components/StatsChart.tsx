@@ -34,7 +34,7 @@ const COLORS = [
 ];
 
 export default function StatsChart({ games }: StatsChartProps) {
-  const top10 = games
+  const top10 = [...games]
     .sort((a, b) => b.playtimeForever - a.playtimeForever)
     .slice(0, 10)
     .map((g) => ({
