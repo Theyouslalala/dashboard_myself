@@ -28,6 +28,12 @@ const userCache = createCache<GitHubUser>(10, 10 * 60 * 1000);
 const repoCache = createCache<GitHubRepo[]>(10, 10 * 60 * 1000);
 const contribCache = createCache<ContributionDay[]>(10, 10 * 60 * 1000);
 
+function authHeaders(token?: string): HeadersInit {
+  const headers: HeadersInit = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  return headers;
+}
+
 export async function getGitHubUser(
   username: string,
   token?: string
@@ -36,11 +42,8 @@ export async function getGitHubUser(
   const cached = userCache.get(cacheKey);
   if (cached) return cached;
 
-  const headers: HeadersInit = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-
   const res = await fetch(`https://api.github.com/users/${username}`, {
-    headers,
+    headers: authHeaders(token),
     signal: AbortSignal.timeout(10_000),
   });
   if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
@@ -58,12 +61,9 @@ export async function getGitHubRepos(
   const cached = repoCache.get(cacheKey);
   if (cached) return cached;
 
-  const headers: HeadersInit = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-
   const res = await fetch(
     `https://api.github.com/users/${username}/repos?sort=updated&per_page=6`,
-    { headers, signal: AbortSignal.timeout(10_000) }
+    { headers: authHeaders(token), signal: AbortSignal.timeout(10_000) }
   );
   if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
 
@@ -101,8 +101,8 @@ export async function getContributions(
 
   const headers: HeadersInit = {
     "Content-Type": "application/json",
+    ...authHeaders(token),
   };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
 
   const res = await fetch("https://api.github.com/graphql", {
     method: "POST",
@@ -124,7 +124,6 @@ export async function getContributions(
         level: 0,
       });
     }
-    contribCache.set(cacheKey, days);
     return days;
   }
 
