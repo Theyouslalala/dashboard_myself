@@ -1,17 +1,6 @@
 import { createCache } from "./cache";
-
-export interface LeetCodeStats {
-  totalSolved: number;
-  easySolved: number;
-  mediumSolved: number;
-  hardSolved: number;
-  totalEasy: number;
-  totalMedium: number;
-  totalHard: number;
-  acceptanceRate: number;
-  ranking: number;
-  contributionPoints: number;
-}
+import type { LeetCodeStats } from "./types";
+export type { LeetCodeStats };
 
 interface SubmissionStat {
   difficulty: string;

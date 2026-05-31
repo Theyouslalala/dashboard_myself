@@ -1,5 +1,18 @@
 import { createCache } from "./cache";
+import type { ContributionDay } from "./types";
+export type { ContributionDay };
 
+/** Raw GitHub REST API user shape. */
+export interface GitHubUser {
+  login: string;
+  avatar_url: string;
+  bio: string | null;
+  public_repos: number;
+  followers: number;
+  following: number;
+}
+
+/** Raw GitHub REST API repo shape. */
 export interface GitHubRepo {
   name: string;
   description: string | null;
@@ -11,29 +24,16 @@ export interface GitHubRepo {
   topics: string[];
 }
 
-export interface GitHubUser {
-  login: string;
-  avatar_url: string;
-  bio: string | null;
-  public_repos: number;
-  followers: number;
-  following: number;
-}
-
-export interface ContributionDay {
-  date: string;
-  count: number;
-  level: number; // 0-4
-}
-
-const cache = createCache<unknown>(50, 10 * 60 * 1000);
+const userCache = createCache<GitHubUser>(10, 10 * 60 * 1000);
+const repoCache = createCache<GitHubRepo[]>(10, 10 * 60 * 1000);
+const contribCache = createCache<ContributionDay[]>(10, 10 * 60 * 1000);
 
 export async function getGitHubUser(
   username: string,
   token?: string
 ): Promise<GitHubUser> {
   const cacheKey = `gh_user_${username}`;
-  const cached = cache.get(cacheKey) as GitHubUser | null;
+  const cached = userCache.get(cacheKey);
   if (cached) return cached;
 
   const headers: HeadersInit = {};
@@ -46,7 +46,7 @@ export async function getGitHubUser(
   if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
 
   const data: GitHubUser = await res.json();
-  cache.set(cacheKey, data);
+  userCache.set(cacheKey, data);
   return data;
 }
 
@@ -55,7 +55,7 @@ export async function getGitHubRepos(
   token?: string
 ): Promise<GitHubRepo[]> {
   const cacheKey = `gh_repos_${username}`;
-  const cached = cache.get(cacheKey) as GitHubRepo[] | null;
+  const cached = repoCache.get(cacheKey);
   if (cached) return cached;
 
   const headers: HeadersInit = {};
@@ -68,7 +68,7 @@ export async function getGitHubRepos(
   if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
 
   const data: GitHubRepo[] = await res.json();
-  cache.set(cacheKey, data);
+  repoCache.set(cacheKey, data);
   return data;
 }
 
@@ -77,7 +77,7 @@ export async function getContributions(
   token?: string
 ): Promise<ContributionDay[]> {
   const cacheKey = `gh_contrib_${username}`;
-  const cached = cache.get(cacheKey) as ContributionDay[] | null;
+  const cached = contribCache.get(cacheKey);
   if (cached) return cached;
 
   // Use GraphQL variables to prevent injection
@@ -150,6 +150,6 @@ export async function getContributions(
     }
   }
 
-  cache.set(cacheKey, days);
+  contribCache.set(cacheKey, days);
   return days;
 }
