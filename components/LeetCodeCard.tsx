@@ -17,25 +17,31 @@ interface LeetCodeStats {
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
-function ProgressBar({
+function DifficultyBar({
+  label,
   solved,
   total,
   color,
+  glowColor,
 }: {
+  label: string;
   solved: number;
   total: number;
   color: string;
+  glowColor: string;
 }) {
   const pct = total > 0 ? (solved / total) * 100 : 0;
   return (
-    <div className="w-full">
-      <div className="flex justify-between text-sm mb-1">
-        <span className="text-gray-300">{solved}</span>
-        <span className="text-gray-500">{total}</span>
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between">
+        <span className={`text-xs font-medium ${color}`}>{label}</span>
+        <span className="stat-number text-xs text-slate-400">
+          {solved} <span className="text-slate-600">/ {total}</span>
+        </span>
       </div>
-      <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+      <div className="progress-bar">
         <div
-          className={`h-full rounded-full transition-all duration-500 ${color}`}
+          className={`progress-bar-fill ${glowColor}`}
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -52,90 +58,85 @@ export default function LeetCodeCard() {
 
   if (isLoading) {
     return (
-      <section className="space-y-4">
+      <div className="card p-6 space-y-4">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gray-700 rounded-lg animate-pulse" />
-          <div className="h-6 w-28 bg-gray-700 rounded animate-pulse" />
+          <div className="w-8 h-8 rounded-lg bg-slate-800 animate-pulse" />
+          <div className="h-6 w-28 bg-slate-800 rounded animate-pulse" />
         </div>
-        <div className="h-48 bg-gray-800 rounded-lg animate-pulse" />
-      </section>
+        <div className="h-48 bg-slate-800/50 rounded-lg animate-pulse" />
+      </div>
     );
   }
 
   if (error || !data) {
     return (
-      <section className="bg-gray-800/50 rounded-lg p-6 text-center">
-        <p className="text-gray-400">
-          {error ? "LeetCode 数据加载失败" : "请配置 LeetCode 用户名"}
+      <div className="card p-8 text-center">
+        <div className="text-4xl mb-3 opacity-40">⊘</div>
+        <p className="text-slate-500 text-sm font-mono">
+          {error ? "CONNECTION FAILED" : "CONFIGURE LEETCODE USERNAME"}
         </p>
-      </section>
+      </div>
     );
   }
 
   return (
-    <section className="space-y-4">
+    <div className="card p-6 space-y-6">
+      {/* Section Header */}
       <div className="flex items-center gap-3">
-        <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none">
+        <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none">
           <path
             d="M13.483 0a1.374 1.374 0 0 0-.961.438L7.116 6.226l-3.854 4.126a5.266 5.266 0 0 0-1.209 2.104 5.35 5.35 0 0 0-.125.513 5.527 5.527 0 0 0 .062 2.362 5.83 5.83 0 0 0 .349 1.017 5.938 5.938 0 0 0 1.271 1.818l4.277 4.193.039.038c2.248 2.165 5.852 2.133 8.063-.074 2.21-2.207 2.246-5.806.076-8.04L13.483 0zm2.317 8.237a2.143 2.143 0 0 1 3.035 0 2.143 2.143 0 0 1 0 3.035l-6.47 6.47a2.143 2.143 0 0 1-3.035 0 2.143 2.143 0 0 1 0-3.035l6.47-6.47z"
             fill="#ffa116"
           />
         </svg>
-        <h2 className="text-2xl font-bold text-white">LeetCode</h2>
-      </div>
-
-      {/* Main Stats */}
-      <div className="bg-gray-800/50 rounded-lg p-5 border border-gray-700/50">
-        <div className="text-center mb-4">
-          <p className="text-4xl font-bold text-white">{data.totalSolved}</p>
-          <p className="text-gray-400 text-sm">已解决题目</p>
-        </div>
-
-        <div className="space-y-3">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-green-400 font-medium text-sm">简单</span>
-            </div>
-            <ProgressBar
-              solved={data.easySolved}
-              total={data.totalEasy}
-              color="bg-green-500"
-            />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-yellow-400 font-medium text-sm">中等</span>
-            </div>
-            <ProgressBar
-              solved={data.mediumSolved}
-              total={data.totalMedium}
-              color="bg-yellow-500"
-            />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-red-400 font-medium text-sm">困难</span>
-            </div>
-            <ProgressBar
-              solved={data.hardSolved}
-              total={data.totalHard}
-              color="bg-red-500"
-            />
-          </div>
+        <div>
+          <h2 className="text-lg font-semibold text-slate-100">LeetCode</h2>
+          <span className="text-[10px] font-mono text-slate-600 tracking-wider">PROGRESS</span>
         </div>
       </div>
 
-      {/* Extra Stats */}
+      {/* Central Solved Count */}
+      <div className="text-center py-4">
+        <p className="stat-number text-5xl font-bold bg-gradient-to-b from-amber-300 to-amber-500 bg-clip-text text-transparent">
+          {data.totalSolved}
+        </p>
+        <p className="text-xs text-slate-500 font-mono mt-1 tracking-wider">PROBLEMS SOLVED</p>
+      </div>
+
+      {/* Difficulty Breakdown */}
+      <div className="space-y-4">
+        <DifficultyBar
+          label="Easy"
+          solved={data.easySolved}
+          total={data.totalEasy}
+          color="text-emerald-400"
+          glowColor="bg-emerald-500"
+        />
+        <DifficultyBar
+          label="Medium"
+          solved={data.mediumSolved}
+          total={data.totalMedium}
+          color="text-amber-400"
+          glowColor="bg-amber-500"
+        />
+        <DifficultyBar
+          label="Hard"
+          solved={data.hardSolved}
+          total={data.totalHard}
+          color="text-rose-400"
+          glowColor="bg-rose-500"
+        />
+      </div>
+
+      {/* Ranking */}
       {data.ranking > 0 && (
-        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
-          <div className="flex justify-between items-center">
-            <span className="text-gray-400 text-sm">全球排名</span>
-            <span className="text-white font-medium">
-              {data.ranking.toLocaleString()}
-            </span>
-          </div>
+        <div className="flex items-center justify-between p-3 rounded-lg bg-slate-900/40 border border-slate-800/30">
+          <span className="text-xs text-slate-500 font-mono tracking-wider">GLOBAL RANK</span>
+          <span className="stat-number text-sm font-bold text-violet-400">
+            #{data.ranking.toLocaleString()}
+          </span>
         </div>
       )}
-    </section>
+    </div>
   );
 }

@@ -18,32 +18,40 @@ export default function GameCard({
   lastPlayed,
 }: GameCardProps) {
   return (
-    <div className="group relative rounded-lg overflow-hidden bg-gray-800 hover:bg-gray-750 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/10">
+    <div className="game-card group animate-fade-in-up">
+      {/* Image */}
       <div className="aspect-[460/215] relative overflow-hidden">
         <img
           src={getGameHeaderUrl(appid)}
           alt={name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           loading="lazy"
           onError={(e) => {
             (e.target as HTMLImageElement).src =
-              "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDYwIiBoZWlnaHQ9IjIxNSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDYwIiBoZWlnaHQ9IjIxNSIgZmlsbD0iIzJkM2Q0ZCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNmI3MjgwIiBmb250LXNpemU9IjE0Ij5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=";
+              "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='460' height='215' fill='%23111827'%3E%3Crect width='460' height='215'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23374151' font-size='14'%3ENo Image%3C/text%3E%3C/svg%3E";
           }}
         />
+        <div className="game-card-overlay" />
+
+        {/* Active badge */}
         {playtimeRecent > 0 && (
-          <div className="absolute top-2 right-2 bg-green-600/90 text-white text-xs px-2 py-0.5 rounded-full">
-            最近活跃
+          <div className="absolute top-2 right-2 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 backdrop-blur-sm">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[10px] font-mono text-emerald-300">ACTIVE</span>
           </div>
         )}
       </div>
 
-      <div className="p-3">
-        <h3 className="text-white font-medium text-sm truncate">{name}</h3>
+      {/* Info */}
+      <div className="p-3 relative">
+        <h3 className="text-sm font-medium text-slate-200 truncate group-hover:text-cyan-300 transition-colors">
+          {name}
+        </h3>
         <div className="flex items-center justify-between mt-1.5">
-          <span className="text-gray-400 text-xs">
+          <span className="stat-number text-[11px] text-slate-400">
             {formatPlaytime(playtimeForever)}
           </span>
-          <span className="text-gray-500 text-xs">
+          <span className="text-[10px] text-slate-600 font-mono">
             {getLastPlayedDate(lastPlayed)}
           </span>
         </div>

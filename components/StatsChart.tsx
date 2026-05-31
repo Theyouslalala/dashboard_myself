@@ -21,16 +21,16 @@ interface StatsChartProps {
 }
 
 const COLORS = [
-  "#3b82f6",
+  "#22d3ee",
   "#6366f1",
-  "#8b5cf6",
-  "#a855f7",
-  "#d946ef",
-  "#ec4899",
-  "#f43f5e",
+  "#a78bfa",
+  "#34d399",
+  "#fbbf24",
+  "#fb7185",
   "#f97316",
-  "#eab308",
-  "#22c55e",
+  "#818cf8",
+  "#2dd4bf",
+  "#e879f9",
 ];
 
 export default function StatsChart({ games }: StatsChartProps) {
@@ -38,50 +38,63 @@ export default function StatsChart({ games }: StatsChartProps) {
     .sort((a, b) => b.playtimeForever - a.playtimeForever)
     .slice(0, 10)
     .map((g) => ({
-      name: g.name.length > 12 ? g.name.slice(0, 12) + "..." : g.name,
+      name: g.name.length > 14 ? g.name.slice(0, 14) + ".." : g.name,
       hours: Math.round(g.playtimeForever / 60),
       fullName: g.name,
     }));
 
   if (top10.length === 0) {
     return (
-      <div className="flex items-center justify-center h-48 text-gray-500">
-        暂无游戏数据
+      <div className="flex items-center justify-center h-48 text-slate-600 font-mono text-sm">
+        NO DATA AVAILABLE
       </div>
     );
   }
 
   return (
     <div className="w-full h-64">
-      <h3 className="text-white font-medium mb-3">游玩时长 Top 10</h3>
-      <ResponsiveContainer width="100%" height="100%">
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-xs font-mono text-slate-500 tracking-wider">TOP 10 BY PLAYTIME</span>
+        <span className="text-[10px] text-slate-600 font-mono">HOURS</span>
+      </div>
+      <ResponsiveContainer width="100%" height="90%">
         <BarChart
           data={top10}
           layout="vertical"
-          margin={{ top: 0, right: 20, left: 0, bottom: 0 }}
+          margin={{ top: 0, right: 10, left: 0, bottom: 0 }}
         >
-          <XAxis type="number" tick={{ fill: "#9ca3af", fontSize: 12 }} />
+          <XAxis
+            type="number"
+            tick={{ fill: "#475569", fontSize: 10, fontFamily: "monospace" }}
+            axisLine={false}
+            tickLine={false}
+          />
           <YAxis
             type="category"
             dataKey="name"
-            width={100}
-            tick={{ fill: "#d1d5db", fontSize: 11 }}
+            width={95}
+            tick={{ fill: "#94a3b8", fontSize: 11 }}
+            axisLine={false}
+            tickLine={false}
           />
           <Tooltip
+            cursor={{ fill: "rgba(34, 211, 238, 0.03)" }}
             contentStyle={{
-              background: "#1f2937",
-              border: "1px solid #374151",
+              background: "rgba(17, 24, 39, 0.95)",
+              border: "1px solid rgba(34, 211, 238, 0.2)",
               borderRadius: "8px",
-              color: "#fff",
+              color: "#e2e8f0",
+              fontSize: "12px",
+              fontFamily: "monospace",
             }}
             formatter={(value, _name, props) => [
-              `${value} 小时`,
+              `${value}h`,
               (props.payload as { fullName?: string }).fullName || "",
             ]}
           />
-          <Bar dataKey="hours" radius={[0, 4, 4, 0]}>
+          <Bar dataKey="hours" radius={[0, 4, 4, 0]} barSize={16}>
             {top10.map((_, index) => (
-              <Cell key={index} fill={COLORS[index % COLORS.length]} />
+              <Cell key={index} fill={COLORS[index % COLORS.length]} fillOpacity={0.8} />
             ))}
           </Bar>
         </BarChart>

@@ -13,41 +13,46 @@ export default function Home() {
   const showSteam = mode === "normal" || mode === "gaming";
 
   return (
-    <main className="min-h-screen p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+    <main className="min-h-screen p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto relative z-10">
       <Header mode={mode} onModeChange={setMode} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* GitHub Column */}
-        <div className="animate-fade-in">
+      <div className={`grid gap-6 ${
+        showSteam
+          ? "grid-cols-1 lg:grid-cols-3"
+          : "grid-cols-1 lg:grid-cols-2"
+      }`}>
+        {/* GitHub */}
+        <div className="animate-fade-in-up" style={{ animationDelay: "100ms" }}>
           <GitHubCard />
         </div>
 
-        {/* LeetCode Column */}
-        <div className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
+        {/* LeetCode */}
+        <div className="animate-fade-in-up" style={{ animationDelay: "200ms" }}>
           <LeetCodeCard />
         </div>
 
-        {/* Steam Column - conditionally shown */}
+        {/* Steam - conditionally shown */}
         {showSteam && (
-          <div className="animate-fade-in" style={{ animationDelay: "0.2s" }}>
+          <div className="animate-fade-in-up" style={{ animationDelay: "300ms" }}>
             <SteamSection />
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <footer className="mt-12 text-center text-gray-600 text-sm pb-6">
-        <p>
-          Built with Next.js + Tailwind CSS |{" "}
+      <footer className="mt-16 pb-8">
+        <div className="glow-line mb-6" />
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] font-mono text-slate-700">
+          <span>Built with Next.js + Tailwind CSS + Recharts</span>
           <a
             href="https://github.com/Theyouslalala"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-500 hover:text-gray-400 transition-colors"
+            className="text-slate-600 hover:text-cyan-500 transition-colors"
           >
             @Theyouslalala
           </a>
-        </p>
+        </div>
       </footer>
     </main>
   );

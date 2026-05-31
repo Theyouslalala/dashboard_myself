@@ -27,6 +27,16 @@ interface SteamData {
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
+function StatBox({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
+  return (
+    <div className="p-4 rounded-xl bg-slate-900/40 border border-slate-800/30">
+      <p className="text-[10px] font-mono text-slate-600 tracking-wider mb-1">{label}</p>
+      <p className="stat-number text-2xl font-bold text-slate-100">{value}</p>
+      {sub && <p className="text-[10px] text-slate-600 mt-0.5">{sub}</p>}
+    </div>
+  );
+}
+
 export default function SteamSection() {
   const { data, error, isLoading } = useSWR<SteamData>(
     "/api/steam",
@@ -36,97 +46,94 @@ export default function SteamSection() {
 
   if (isLoading) {
     return (
-      <section className="space-y-6">
+      <div className="card p-6 space-y-6">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gray-700 rounded-lg animate-pulse" />
-          <div className="h-6 w-32 bg-gray-700 rounded animate-pulse" />
+          <div className="w-8 h-8 rounded-lg bg-slate-800 animate-pulse" />
+          <div className="h-6 w-32 bg-slate-800 rounded animate-pulse" />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 bg-gray-800 rounded-lg animate-pulse" />
+            <div key={i} className="h-24 bg-slate-800/50 rounded-xl animate-pulse" />
           ))}
         </div>
-        <div className="h-64 bg-gray-800 rounded-lg animate-pulse" />
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        <div className="h-64 bg-slate-800/50 rounded-xl animate-pulse" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-40 bg-gray-800 rounded-lg animate-pulse" />
+            <div key={i} className="h-40 bg-slate-800/50 rounded-lg animate-pulse" />
           ))}
         </div>
-      </section>
+      </div>
     );
   }
 
   if (error || !data) {
     return (
-      <section className="bg-gray-800/50 rounded-lg p-6 text-center">
-        <p className="text-gray-400">
-          {error ? "Steam 数据加载失败" : "请配置 Steam API Key"}
+      <div className="card p-8 text-center">
+        <div className="text-4xl mb-3 opacity-40">⊘</div>
+        <p className="text-slate-500 text-sm font-mono">
+          {error ? "CONNECTION FAILED" : "CONFIGURE STEAM API KEY"}
         </p>
-      </section>
+      </div>
     );
   }
 
   const { player, stats, games } = data;
 
   return (
-    <section className="space-y-6">
+    <div className="card p-6 space-y-6">
+      {/* Section Header */}
       <div className="flex items-center gap-3">
-        <svg className="w-8 h-8" viewBox="0 0 256 256" fill="none">
+        <svg className="w-7 h-7 text-slate-300" viewBox="0 0 256 256" fill="none">
           <path
-            d="M127.6 0C57.2 0 0 57.2 0 127.6c0 70.4 57.2 127.6 127.6 127.6s127.6-57.2 127.6-127.6C255.2 57.2 198 0 127.6 0zM69.5 177.2l32.7-14.1c1.8 3.6 4.5 6.6 7.9 8.7l-18.3 26.3c-15.4-6.3-22.3-22.3-22.3-20.9zm128.4 12.1l-18.8-27.2c3.5-2.1 6.3-5.2 8.1-9l34 14.6c-1 16.4-8.3 22.6-23.3 21.6zm-65.5-45.3c-13.5 0-24.5-11-24.5-24.5s11-24.5 24.5-24.5 24.5 11 24.5 24.5-11 24.5-24.5 24.5zm59.3-34.5c-2-14.7-14.4-25.9-29.3-25.9-2.5 0-5 .3-7.4.9l-22.3-12.9 1.3-31.5 21.5 12.4c11.4-5 24.4-2.8 33.4 5.7 9 8.5 11.7 21.3 7 32.4l.2.1-4.4 18.8z"
+            d="M127.6 0C57.2 0 0 57.2 0 127.6c0 70.4 57.2 127.6 127.6 127.6s127.6-57.2 127.6-127.6C255.2 57.2 198 0 127.6 0z"
             fill="#1b2838"
           />
           <path
             d="M127.6 0C57.2 0 0 57.2 0 127.6c0 70.4 57.2 127.6 127.6 127.6s127.6-57.2 127.6-127.6C255.2 57.2 198 0 127.6 0z"
             fill="#66c0f4"
-            opacity="0.2"
+            opacity="0.15"
           />
         </svg>
         <div>
-          <h2 className="text-2xl font-bold text-white">Steam 游戏库</h2>
-          {player && (
-            <p className="text-gray-400 text-sm">
-              {player.name}
-            </p>
-          )}
+          <h2 className="text-lg font-semibold text-slate-100">Steam</h2>
+          <span className="text-[10px] font-mono text-slate-600 tracking-wider">GAME LIBRARY</span>
         </div>
+        {player && (
+          <span className="ml-auto text-xs text-slate-500 font-mono">{player.name}</span>
+        )}
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
-          <p className="text-gray-400 text-sm">总游戏数</p>
-          <p className="text-2xl font-bold text-white">{stats.totalGames}</p>
-        </div>
-        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
-          <p className="text-gray-400 text-sm">总游玩时长</p>
-          <p className="text-2xl font-bold text-white">
-            {Math.round(stats.totalPlaytime / 60)} 小时
-          </p>
-        </div>
-        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
-          <p className="text-gray-400 text-sm">近 2 周活跃</p>
-          <p className="text-2xl font-bold text-white">
-            {stats.recentGamesCount} 款 /{" "}
-            {Math.round(stats.recentPlaytime / 60)} 小时
-          </p>
-        </div>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-3 gap-3">
+        <StatBox label="GAMES" value={stats.totalGames} />
+        <StatBox
+          label="PLAYTIME"
+          value={`${Math.round(stats.totalPlaytime / 60)}h`}
+        />
+        <StatBox
+          label="RECENT 2W"
+          value={stats.recentGamesCount}
+          sub={`${Math.round(stats.recentPlaytime / 60)}h played`}
+        />
       </div>
 
       {/* Chart */}
-      <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
+      <div className="p-4 rounded-xl bg-slate-900/30 border border-slate-800/20">
         <StatsChart games={games} />
       </div>
 
       {/* Game Cards */}
       <div>
-        <h3 className="text-white font-medium mb-3">全部游戏</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs font-mono text-slate-500 tracking-wider">ALL GAMES</span>
+          <span className="text-[10px] text-slate-600 font-mono">{games.length} titles</span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 stagger-children">
           {games.map((game) => (
             <GameCard key={game.appid} {...game} />
           ))}
         </div>
       </div>
-    </section>
+    </div>
   );
 }
