@@ -1,3 +1,5 @@
+import { createCache } from "./cache";
+
 export interface SteamGame {
   appid: number;
   name: string;
@@ -15,43 +17,23 @@ export interface SteamPlayerSummary {
   personastate: number;
 }
 
-export interface SteamOwnedGamesResponse {
+interface SteamOwnedGamesResponse {
   response: {
     game_count: number;
     games: SteamGame[];
   };
 }
 
-export interface SteamPlayerSummaryResponse {
+interface SteamPlayerSummaryResponse {
   response: {
     players: SteamPlayerSummary[];
   };
 }
 
-const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
-const MAX_CACHE_SIZE = 20;
-const cache = new Map<string, { data: unknown; timestamp: number }>();
+const cache = createCache<unknown>(20, 10 * 60 * 1000);
 
 function validateSteamId(steamId: string): boolean {
   return /^\d{17}$/.test(steamId);
-}
-
-function getCached<T>(key: string): T | null {
-  const entry = cache.get(key);
-  if (!entry) return null;
-  if (Date.now() - entry.timestamp > CACHE_DURATION) {
-    cache.delete(key);
-    return null;
-  }
-  return entry.data as T;
-}
-
-function setCache(key: string, data: unknown) {
-  if (cache.size >= MAX_CACHE_SIZE) {
-    const oldest = cache.keys().next().value;
-    if (oldest !== undefined) cache.delete(oldest);
-  }
-  cache.set(key, { data, timestamp: Date.now() });
 }
 
 export async function getOwnedGames(
@@ -61,16 +43,16 @@ export async function getOwnedGames(
   if (!validateSteamId(steamId)) throw new Error("Invalid Steam ID format");
 
   const cacheKey = `owned_${steamId}`;
-  const cached = getCached<SteamGame[]>(cacheKey);
+  const cached = cache.get(cacheKey) as SteamGame[] | null;
   if (cached) return cached;
 
   const url = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${apiKey}&steamid=${steamId}&include_appinfo=1&include_played_free_games=1&format=json`;
-  const res = await fetch(url);
+  const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
   if (!res.ok) throw new Error(`Steam API error: ${res.status}`);
 
   const data: SteamOwnedGamesResponse = await res.json();
   const games = data.response.games || [];
-  setCache(cacheKey, games);
+  cache.set(cacheKey, games);
   return games;
 }
 
@@ -81,16 +63,16 @@ export async function getPlayerSummary(
   if (!validateSteamId(steamId)) throw new Error("Invalid Steam ID format");
 
   const cacheKey = `summary_${steamId}`;
-  const cached = getCached<SteamPlayerSummary | null>(cacheKey);
+  const cached = cache.get(cacheKey) as SteamPlayerSummary | null;
   if (cached) return cached;
 
   const url = `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${apiKey}&steamids=${steamId}&format=json`;
-  const res = await fetch(url);
+  const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
   if (!res.ok) throw new Error(`Steam API error: ${res.status}`);
 
   const data: SteamPlayerSummaryResponse = await res.json();
   const player = data.response.players[0] || null;
-  setCache(cacheKey, player);
+  cache.set(cacheKey, player);
   return player;
 }
 
@@ -101,16 +83,16 @@ export async function getRecentlyPlayedGames(
   if (!validateSteamId(steamId)) throw new Error("Invalid Steam ID format");
 
   const cacheKey = `recent_${steamId}`;
-  const cached = getCached<SteamGame[]>(cacheKey);
+  const cached = cache.get(cacheKey) as SteamGame[] | null;
   if (cached) return cached;
 
   const url = `https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key=${apiKey}&steamid=${steamId}&format=json`;
-  const res = await fetch(url);
+  const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
   if (!res.ok) throw new Error(`Steam API error: ${res.status}`);
 
   const data: SteamOwnedGamesResponse = await res.json();
   const games = data.response.games || [];
-  setCache(cacheKey, games);
+  cache.set(cacheKey, games);
   return games;
 }
 
@@ -119,23 +101,23 @@ export function getGameHeaderUrl(appid: number): string {
 }
 
 export function formatPlaytime(minutes: number): string {
-  if (minutes < 60) return `${minutes}分钟`;
+  if (minutes < 60) return `${minutes}min`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 100) return `${hours}小时${minutes % 60}分钟`;
-  return `${hours}小时`;
+  if (hours < 100) return `${hours}h${minutes % 60}m`;
+  return `${hours}h`;
 }
 
 export function getLastPlayedDate(timestamp?: number): string {
-  if (!timestamp) return "从未游玩";
+  if (!timestamp) return "Never";
   const date = new Date(timestamp * 1000);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) return "今天";
-  if (diffDays === 1) return "昨天";
-  if (diffDays < 7) return `${diffDays}天前`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)}周前`;
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)}个月前`;
-  return `${Math.floor(diffDays / 365)}年前`;
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
+  return `${Math.floor(diffDays / 365)}y ago`;
 }

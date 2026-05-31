@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -9,15 +10,10 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
-
-interface GameData {
-  appid: number;
-  name: string;
-  playtimeForever: number;
-}
+import type { SteamGameView } from "@/lib/types";
 
 interface StatsChartProps {
-  games: GameData[];
+  games: SteamGameView[];
 }
 
 const COLORS = [
@@ -34,14 +30,18 @@ const COLORS = [
 ];
 
 export default function StatsChart({ games }: StatsChartProps) {
-  const top10 = [...games]
-    .sort((a, b) => b.playtimeForever - a.playtimeForever)
-    .slice(0, 10)
-    .map((g) => ({
-      name: g.name.length > 14 ? g.name.slice(0, 14) + ".." : g.name,
-      hours: Math.round(g.playtimeForever / 60),
-      fullName: g.name,
-    }));
+  const top10 = useMemo(
+    () =>
+      [...games]
+        .sort((a, b) => b.playtimeForever - a.playtimeForever)
+        .slice(0, 10)
+        .map((g) => ({
+          name: g.name.length > 14 ? g.name.slice(0, 14) + ".." : g.name,
+          hours: Math.round(g.playtimeForever / 60),
+          fullName: g.name,
+        })),
+    [games]
+  );
 
   if (top10.length === 0) {
     return (

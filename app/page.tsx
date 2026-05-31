@@ -5,15 +5,17 @@ import Header from "@/components/Header";
 import GitHubCard from "@/components/GitHubCard";
 import LeetCodeCard from "@/components/LeetCodeCard";
 import SteamSection from "@/components/SteamSection";
-import { DashboardMode } from "@/lib/config";
+import type { DashboardMode } from "@/lib/types";
+
+const STEAM_MODES: DashboardMode[] = ["normal", "gaming"];
 
 export default function Home() {
   const [mode, setMode] = useState<DashboardMode>("normal");
 
-  const showSteam = mode === "normal" || mode === "gaming";
+  const showSteam = STEAM_MODES.includes(mode);
 
   return (
-    <main className="min-h-screen p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto relative z-10">
+    <main id="main" className="min-h-screen p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto relative z-10">
       <Header mode={mode} onModeChange={setMode} />
 
       <div className={`grid gap-6 ${

@@ -16,8 +16,9 @@ export async function GET() {
   try {
     const stats = await getLeetCodeStats(username);
     return NextResponse.json(stats);
-  } catch (err) {
-    console.error("LeetCode API error:", err);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("LeetCode API error:", message);
     return NextResponse.json(
       { error: "Failed to fetch LeetCode data" },
       { status: 500 }

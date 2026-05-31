@@ -59,8 +59,9 @@ export async function GET() {
           lastPlayed: g.rtime_last_played,
         })),
     });
-  } catch (err) {
-    console.error("Steam API error:", err);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("Steam API error:", message);
     return NextResponse.json(
       { error: "Failed to fetch Steam data" },
       { status: 500 }

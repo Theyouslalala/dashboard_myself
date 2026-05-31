@@ -41,8 +41,9 @@ export async function GET() {
       })),
       contributions,
     });
-  } catch (err) {
-    console.error("GitHub API error:", err);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("GitHub API error:", message);
     return NextResponse.json(
       { error: "Failed to fetch GitHub data" },
       { status: 500 }

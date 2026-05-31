@@ -2,29 +2,9 @@
 
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
+import type { SteamData } from "@/lib/types";
 import GameCard from "./GameCard";
 import StatsChart from "./StatsChart";
-
-interface SteamData {
-  player: {
-    name: string;
-    avatar: string;
-    profileUrl: string;
-  } | null;
-  stats: {
-    totalGames: number;
-    totalPlaytime: number;
-    recentGamesCount: number;
-    recentPlaytime: number;
-  };
-  games: {
-    appid: number;
-    name: string;
-    playtimeForever: number;
-    playtimeRecent: number;
-    lastPlayed?: number;
-  }[];
-}
 
 function StatBox({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
@@ -82,7 +62,7 @@ export default function SteamSection() {
     <div className="card p-6 space-y-6">
       {/* Section Header */}
       <div className="flex items-center gap-3">
-        <svg className="w-7 h-7 text-slate-300" viewBox="0 0 256 256" fill="none">
+        <svg className="w-7 h-7 text-slate-300" viewBox="0 0 256 256" fill="none" aria-hidden="true">
           <path
             d="M127.6 0C57.2 0 0 57.2 0 127.6c0 70.4 57.2 127.6 127.6 127.6s127.6-57.2 127.6-127.6C255.2 57.2 198 0 127.6 0z"
             fill="#1b2838"

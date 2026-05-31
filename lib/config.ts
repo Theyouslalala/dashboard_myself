@@ -1,4 +1,5 @@
-export type DashboardMode = "normal" | "professional" | "gaming";
+import type { DashboardMode } from "./types";
+export type { DashboardMode };
 
 export interface ModuleConfig {
   visible: "always" | "hidden" | "conditional";

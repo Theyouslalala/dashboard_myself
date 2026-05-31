@@ -1,6 +1,6 @@
 "use client";
 
-import { DashboardMode } from "@/lib/config";
+import type { DashboardMode } from "@/lib/types";
 
 interface HeaderProps {
   mode: DashboardMode;
@@ -39,10 +39,12 @@ export default function Header({ mode, onModeChange }: HeaderProps) {
         </div>
 
         {/* Mode switcher */}
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900/80 border border-slate-800/60">
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900/80 border border-slate-800/60" role="radiogroup" aria-label="Dashboard mode">
           {MODES.map((m) => (
             <button
               key={m.key}
+              role="radio"
+              aria-checked={mode === m.key}
               onClick={() => onModeChange(m.key)}
               className={`relative px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${
                 mode === m.key

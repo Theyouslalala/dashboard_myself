@@ -1,3 +1,5 @@
+import { createCache } from "./cache";
+
 export interface GitHubRepo {
   name: string;
   description: string | null;
@@ -24,34 +26,14 @@ export interface ContributionDay {
   level: number; // 0-4
 }
 
-const CACHE_DURATION = 10 * 60 * 1000;
-const MAX_CACHE_SIZE = 50;
-const cache = new Map<string, { data: unknown; timestamp: number }>();
-
-function getCached<T>(key: string): T | null {
-  const entry = cache.get(key);
-  if (!entry) return null;
-  if (Date.now() - entry.timestamp > CACHE_DURATION) {
-    cache.delete(key);
-    return null;
-  }
-  return entry.data as T;
-}
-
-function setCache(key: string, data: unknown) {
-  if (cache.size >= MAX_CACHE_SIZE) {
-    const oldest = cache.keys().next().value;
-    if (oldest !== undefined) cache.delete(oldest);
-  }
-  cache.set(key, { data, timestamp: Date.now() });
-}
+const cache = createCache<unknown>(50, 10 * 60 * 1000);
 
 export async function getGitHubUser(
   username: string,
   token?: string
 ): Promise<GitHubUser> {
   const cacheKey = `gh_user_${username}`;
-  const cached = getCached<GitHubUser>(cacheKey);
+  const cached = cache.get(cacheKey) as GitHubUser | null;
   if (cached) return cached;
 
   const headers: HeadersInit = {};
@@ -59,11 +41,12 @@ export async function getGitHubUser(
 
   const res = await fetch(`https://api.github.com/users/${username}`, {
     headers,
+    signal: AbortSignal.timeout(10_000),
   });
   if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
 
-  const data = await res.json();
-  setCache(cacheKey, data);
+  const data: GitHubUser = await res.json();
+  cache.set(cacheKey, data);
   return data;
 }
 
@@ -72,7 +55,7 @@ export async function getGitHubRepos(
   token?: string
 ): Promise<GitHubRepo[]> {
   const cacheKey = `gh_repos_${username}`;
-  const cached = getCached<GitHubRepo[]>(cacheKey);
+  const cached = cache.get(cacheKey) as GitHubRepo[] | null;
   if (cached) return cached;
 
   const headers: HeadersInit = {};
@@ -80,12 +63,12 @@ export async function getGitHubRepos(
 
   const res = await fetch(
     `https://api.github.com/users/${username}/repos?sort=updated&per_page=6`,
-    { headers }
+    { headers, signal: AbortSignal.timeout(10_000) }
   );
   if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
 
-  const data = await res.json();
-  setCache(cacheKey, data);
+  const data: GitHubRepo[] = await res.json();
+  cache.set(cacheKey, data);
   return data;
 }
 
@@ -94,7 +77,7 @@ export async function getContributions(
   token?: string
 ): Promise<ContributionDay[]> {
   const cacheKey = `gh_contrib_${username}`;
-  const cached = getCached<ContributionDay[]>(cacheKey);
+  const cached = cache.get(cacheKey) as ContributionDay[] | null;
   if (cached) return cached;
 
   // Use GraphQL variables to prevent injection
@@ -125,6 +108,7 @@ export async function getContributions(
     method: "POST",
     headers,
     body: JSON.stringify({ query, variables: { login: username } }),
+    signal: AbortSignal.timeout(10_000),
   });
 
   // If GraphQL fails (no auth), generate empty data structure
@@ -144,6 +128,11 @@ export async function getContributions(
   }
 
   const data = await res.json();
+
+  if (data.errors?.length) {
+    console.error("GitHub GraphQL errors:", data.errors);
+    throw new Error(`GitHub GraphQL: ${data.errors[0].message}`);
+  }
   const weeks =
     data.data?.user?.contributionsCollection?.contributionCalendar?.weeks ||
     [];
@@ -161,6 +150,6 @@ export async function getContributions(
     }
   }
 
-  setCache(cacheKey, days);
+  cache.set(cacheKey, days);
   return days;
 }

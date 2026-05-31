@@ -1,16 +1,12 @@
 "use client";
 
+import { memo } from "react";
 import { getGameHeaderUrl, formatPlaytime, getLastPlayedDate } from "@/lib/steam";
+import type { SteamGameView } from "@/lib/types";
 
-interface GameCardProps {
-  appid: number;
-  name: string;
-  playtimeForever: number;
-  playtimeRecent: number;
-  lastPlayed?: number;
-}
+type GameCardProps = SteamGameView;
 
-export default function GameCard({
+const GameCard = memo(function GameCard({
   appid,
   name,
   playtimeForever,
@@ -23,7 +19,7 @@ export default function GameCard({
       <div className="aspect-[460/215] relative overflow-hidden">
         <img
           src={getGameHeaderUrl(appid)}
-          alt={name}
+          alt={`${name} game artwork`}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           loading="lazy"
           onError={(e) => {
@@ -61,4 +57,6 @@ export default function GameCard({
       </div>
     </div>
   );
-}
+});
+
+export default GameCard;

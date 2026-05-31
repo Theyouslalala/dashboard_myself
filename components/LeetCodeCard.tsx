@@ -2,18 +2,14 @@
 
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
+import type { LeetCodeStats } from "@/lib/types";
 
-interface LeetCodeStats {
-  totalSolved: number;
-  easySolved: number;
-  mediumSolved: number;
-  hardSolved: number;
-  totalEasy: number;
-  totalMedium: number;
-  totalHard: number;
-  acceptanceRate: number;
-  ranking: number;
-  contributionPoints: number;
+interface DifficultyBarProps {
+  label: string;
+  solved: number;
+  total: number;
+  color: string;
+  glowColor: string;
 }
 
 function DifficultyBar({
@@ -22,13 +18,7 @@ function DifficultyBar({
   total,
   color,
   glowColor,
-}: {
-  label: string;
-  solved: number;
-  total: number;
-  color: string;
-  glowColor: string;
-}) {
+}: DifficultyBarProps) {
   const pct = total > 0 ? (solved / total) * 100 : 0;
   return (
     <div className="space-y-1.5">
@@ -82,7 +72,7 @@ export default function LeetCodeCard() {
     <div className="card p-6 space-y-6">
       {/* Section Header */}
       <div className="flex items-center gap-3">
-        <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none">
+        <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path
             d="M13.483 0a1.374 1.374 0 0 0-.961.438L7.116 6.226l-3.854 4.126a5.266 5.266 0 0 0-1.209 2.104 5.35 5.35 0 0 0-.125.513 5.527 5.527 0 0 0 .062 2.362 5.83 5.83 0 0 0 .349 1.017 5.938 5.938 0 0 0 1.271 1.818l4.277 4.193.039.038c2.248 2.165 5.852 2.133 8.063-.074 2.21-2.207 2.246-5.806.076-8.04L13.483 0zm2.317 8.237a2.143 2.143 0 0 1 3.035 0 2.143 2.143 0 0 1 0 3.035l-6.47 6.47a2.143 2.143 0 0 1-3.035 0 2.143 2.143 0 0 1 0-3.035l6.47-6.47z"
             fill="#ffa116"
