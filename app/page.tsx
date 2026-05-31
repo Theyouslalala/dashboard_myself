@@ -23,25 +23,20 @@ export default function Home() {
           ? "grid-cols-1 lg:grid-cols-3"
           : "grid-cols-1 lg:grid-cols-2"
       }`}>
-        {/* GitHub */}
         <div className="animate-fade-in-up" style={{ animationDelay: "100ms" }}>
           <GitHubCard />
         </div>
 
-        {/* LeetCode */}
         <div className="animate-fade-in-up" style={{ animationDelay: "200ms" }}>
           <LeetCodeCard />
         </div>
 
-        {/* Steam - conditionally shown */}
         {showSteam && (
           <div className="animate-fade-in-up" style={{ animationDelay: "300ms" }}>
             <SteamSection />
           </div>
         )}
       </div>
-
-      {/* Footer */}
       <footer className="mt-16 pb-8">
         <div className="glow-line mb-6" />
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] font-mono text-slate-700">

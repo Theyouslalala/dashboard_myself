@@ -2,12 +2,7 @@ import { createCache } from "./cache";
 import type { LeetCodeStats } from "./types";
 export type { LeetCodeStats };
 
-interface SubmissionStat {
-  difficulty: string;
-  count: number;
-}
-
-interface QuestionCount {
+interface DifficultyCount {
   difficulty: string;
   count: number;
 }
@@ -56,11 +51,11 @@ export async function getLeetCodeStats(
 
   const data = await res.json();
   const user = data.data?.matchedUser;
-  const allQuestions: QuestionCount[] = data.data?.allQuestionsCount || [];
+  const allQuestions: DifficultyCount[] = data.data?.allQuestionsCount || [];
 
   if (!user) throw new Error("User not found");
 
-  const acStats: SubmissionStat[] =
+  const acStats: DifficultyCount[] =
     user.submitStatsGlobal?.acSubmissionNum || [];
   const easySolved =
     acStats.find((s) => s.difficulty === "Easy")?.count || 0;

@@ -17,7 +17,7 @@ export function createCache<T>(maxSize: number, durationMs: number) {
   }
 
   function set(key: string, data: T): void {
-    if (store.size >= maxSize) {
+    if (!store.has(key) && store.size >= maxSize) {
       const oldest = store.keys().next().value;
       if (oldest !== undefined) store.delete(oldest);
     }

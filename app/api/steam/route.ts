@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/lib/config";
+import { apiError } from "@/lib/errors";
 import {
   getOwnedGames,
   getPlayerSummary,
@@ -60,11 +61,6 @@ export async function GET() {
         })),
     });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error("Steam API error:", message);
-    return NextResponse.json(
-      { error: "Failed to fetch Steam data" },
-      { status: 500 }
-    );
+    return apiError(err, "Steam");
   }
 }

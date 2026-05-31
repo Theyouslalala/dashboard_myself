@@ -124,6 +124,7 @@ export async function getContributions(
         level: 0,
       });
     }
+    contribCache.set(cacheKey, days);
     return days;
   }
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/lib/config";
+import { apiError } from "@/lib/errors";
 import { getGitHubUser, getGitHubRepos, getContributions } from "@/lib/github";
 
 export async function GET() {
@@ -42,11 +43,6 @@ export async function GET() {
       contributions,
     });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error("GitHub API error:", message);
-    return NextResponse.json(
-      { error: "Failed to fetch GitHub data" },
-      { status: 500 }
-    );
+    return apiError(err, "GitHub");
   }
 }

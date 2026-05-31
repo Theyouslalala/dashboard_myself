@@ -51,14 +51,8 @@ export function getConfig(): AppConfig {
       username: getEnv("LEETCODE_USERNAME"),
     },
     modules: {
-      github: {
-        visible: "always",
-        showInModes: ["normal", "professional", "gaming"],
-      },
-      leetcode: {
-        visible: "always",
-        showInModes: ["normal", "professional", "gaming"],
-      },
+      github: { visible: "always", showInModes: [] },
+      leetcode: { visible: "always", showInModes: [] },
       steam: {
         visible: "conditional",
         showInModes: ["normal", "gaming"],
