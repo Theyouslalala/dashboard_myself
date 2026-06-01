@@ -48,6 +48,16 @@ export default function GitHubCard() {
     { refreshInterval: 10 * 60 * 1000 }
   );
 
+  const contribData = data?.contributions;
+  const weeks = useMemo(() => {
+    if (!contribData) return [];
+    const result: ContributionDay[][] = [];
+    for (let i = 0; i < contribData.length; i += 7) {
+      result.push(contribData.slice(i, i + 7));
+    }
+    return result;
+  }, [contribData]);
+
   if (isLoading) return <SkeletonCard />;
 
   if (error || !data) {
@@ -62,14 +72,6 @@ export default function GitHubCard() {
   }
 
   const { user, repos, contributions } = data;
-
-  const weeks = useMemo(() => {
-    const result: ContributionDay[][] = [];
-    for (let i = 0; i < contributions.length; i += 7) {
-      result.push(contributions.slice(i, i + 7));
-    }
-    return result;
-  }, [contributions]);
 
   return (
     <div className="card p-6 space-y-6">

@@ -139,7 +139,7 @@ export async function getContributions(
 
   const days: ContributionDay[] = [];
   for (const week of weeks) {
-    for (const day of week.contributionDays) {
+    for (const day of week.contributionDays ?? []) {
       const count = day.contributionCount;
       let level = 0;
       if (count > 0) level = 1;

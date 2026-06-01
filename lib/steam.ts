@@ -30,8 +30,9 @@ interface SteamPlayerSummaryResponse {
   };
 }
 
-const gamesCache = createCache<SteamGame[]>(20, 10 * 60 * 1000);
-const summaryCache = createCache<SteamPlayerSummary | null>(5, 10 * 60 * 1000);
+const ownedGamesCache = createCache<SteamGame[]>(10, 10 * 60 * 1000);
+const recentGamesCache = createCache<SteamGame[]>(10, 10 * 60 * 1000);
+const summaryCache = createCache<SteamPlayerSummary>(5, 10 * 60 * 1000);
 
 function validateSteamId(steamId: string): boolean {
   return /^\d{17}$/.test(steamId);
@@ -44,7 +45,7 @@ export async function getOwnedGames(
   if (!validateSteamId(steamId)) throw new Error("Invalid Steam ID format");
 
   const cacheKey = `owned_${steamId}`;
-  const cached = gamesCache.get(cacheKey);
+  const cached = ownedGamesCache.get(cacheKey);
   if (cached) return cached;
 
   const url = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${apiKey}&steamid=${steamId}&include_appinfo=1&include_played_free_games=1&format=json`;
@@ -52,8 +53,8 @@ export async function getOwnedGames(
   if (!res.ok) throw new Error(`Steam API error: ${res.status}`);
 
   const data: SteamOwnedGamesResponse = await res.json();
-  const games = data.response.games || [];
-  gamesCache.set(cacheKey, games);
+  const games = data?.response?.games ?? [];
+  ownedGamesCache.set(cacheKey, games);
   return games;
 }
 
@@ -72,8 +73,8 @@ export async function getPlayerSummary(
   if (!res.ok) throw new Error(`Steam API error: ${res.status}`);
 
   const data: SteamPlayerSummaryResponse = await res.json();
-  const player = data.response.players[0] || null;
-  summaryCache.set(cacheKey, player);
+  const player = data?.response?.players?.[0] ?? null;
+  if (player) summaryCache.set(cacheKey, player);
   return player;
 }
 
@@ -84,7 +85,7 @@ export async function getRecentlyPlayedGames(
   if (!validateSteamId(steamId)) throw new Error("Invalid Steam ID format");
 
   const cacheKey = `recent_${steamId}`;
-  const cached = gamesCache.get(cacheKey);
+  const cached = recentGamesCache.get(cacheKey);
   if (cached) return cached;
 
   const url = `https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key=${apiKey}&steamid=${steamId}&format=json`;
@@ -92,8 +93,8 @@ export async function getRecentlyPlayedGames(
   if (!res.ok) throw new Error(`Steam API error: ${res.status}`);
 
   const data: SteamOwnedGamesResponse = await res.json();
-  const games = data.response.games || [];
-  gamesCache.set(cacheKey, games);
+  const games = data?.response?.games ?? [];
+  recentGamesCache.set(cacheKey, games);
   return games;
 }
 

@@ -63,7 +63,9 @@ export async function getLeetCodeStats(
     acStats.find((s) => s.difficulty === "Medium")?.count || 0;
   const hardSolved =
     acStats.find((s) => s.difficulty === "Hard")?.count || 0;
-  const totalSolved = easySolved + mediumSolved + hardSolved;
+  const totalSolved =
+    acStats.find((s) => s.difficulty === "All")?.count ??
+    easySolved + mediumSolved + hardSolved;
 
   const totalEasy =
     allQuestions.find((q) => q.difficulty === "Easy")?.count || 0;
@@ -71,6 +73,12 @@ export async function getLeetCodeStats(
     allQuestions.find((q) => q.difficulty === "Medium")?.count || 0;
   const totalHard =
     allQuestions.find((q) => q.difficulty === "Hard")?.count || 0;
+  const totalAll =
+    allQuestions.find((q) => q.difficulty === "All")?.count ||
+    totalEasy + totalMedium + totalHard;
+
+  const acceptanceRate =
+    totalAll > 0 ? Math.round((totalSolved / totalAll) * 10000) / 100 : 0;
 
   const stats: LeetCodeStats = {
     totalSolved,
@@ -80,7 +88,7 @@ export async function getLeetCodeStats(
     totalEasy,
     totalMedium,
     totalHard,
-    acceptanceRate: 0,
+    acceptanceRate,
     ranking: user.profile?.ranking || 0,
     contributionPoints: user.profile?.reputation || 0,
   };

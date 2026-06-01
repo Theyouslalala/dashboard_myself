@@ -4,5 +4,5 @@ export async function fetcher<T>(url: string): Promise<T> {
     const text = await res.text().catch(() => "Unknown error");
     throw new Error(`Request failed (${res.status}): ${text}`);
   }
-  return res.json();
+  return await res.json();
 }
