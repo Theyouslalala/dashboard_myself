@@ -130,8 +130,15 @@ export async function getContributions(
   const data = await res.json();
 
   if (data.errors?.length) {
-    console.error("GitHub GraphQL errors:", data.errors);
-    throw new Error(`GitHub GraphQL: ${data.errors[0].message}`);
+    console.warn("GitHub GraphQL errors (returning empty):", data.errors[0].message);
+    const days: ContributionDay[] = [];
+    const today = new Date();
+    for (let i = 364; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      days.push({ date: date.toISOString().split("T")[0], count: 0, level: 0 });
+    }
+    return days;
   }
   const weeks =
     data.data?.user?.contributionsCollection?.contributionCalendar?.weeks ||
