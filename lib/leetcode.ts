@@ -37,11 +37,10 @@ export async function getLeetCodeStats(
     }
   `;
 
-  const res = await fetch("https://leetcode.cn/graphql/", {
+  const res = await fetch("https://leetcode.com/graphql/", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Referer: "https://leetcode.cn",
     },
     body: JSON.stringify({ query, variables: { username } }),
     signal: AbortSignal.timeout(10_000),
