@@ -17,64 +17,65 @@ export async function getLeetCodeStats(
   if (cached) return cached;
 
   const query = `
-    query userProblemsSolved($username: String!) {
-      matchedUser(username: $username) {
-        submitStatsGlobal {
-          acSubmissionNum {
-            difficulty
-            count
-          }
-        }
-        profile {
-          ranking
-          reputation
+    query($userSlug: String!) {
+      userProfileUserQuestionSubmitStats(userSlug: $userSlug) {
+        acSubmissionNum {
+          difficulty
+          count
         }
       }
-      allQuestionsCount {
-        difficulty
-        count
+      userProfileUserQuestionProgress(userSlug: $userSlug) {
+        numAcceptedQuestions {
+          difficulty
+          count
+        }
+        numUntouchedQuestions {
+          difficulty
+          count
+        }
       }
     }
   `;
 
-  const res = await fetch("https://leetcode.com/graphql/", {
+  const res = await fetch("https://leetcode.cn/graphql/", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Referer: "https://leetcode.cn",
     },
-    body: JSON.stringify({ query, variables: { username } }),
+    body: JSON.stringify({ query, variables: { userSlug: username } }),
     signal: AbortSignal.timeout(10_000),
   });
 
   if (!res.ok) throw new Error(`LeetCode API error: ${res.status}`);
 
   const data = await res.json();
-  const user = data.data?.matchedUser;
-  const allQuestions: DifficultyCount[] = data.data?.allQuestionsCount || [];
 
-  if (!user) throw new Error("User not found");
+  if (data.errors?.length) {
+    throw new Error(`LeetCode: ${data.errors[0].message}`);
+  }
 
-  const acStats: DifficultyCount[] =
-    user.submitStatsGlobal?.acSubmissionNum || [];
-  const easySolved =
-    acStats.find((s) => s.difficulty === "Easy")?.count || 0;
-  const mediumSolved =
-    acStats.find((s) => s.difficulty === "Medium")?.count || 0;
-  const hardSolved =
-    acStats.find((s) => s.difficulty === "Hard")?.count || 0;
-  const totalSolved =
-    acStats.find((s) => s.difficulty === "All")?.count ??
-    easySolved + mediumSolved + hardSolved;
+  const submitStats: DifficultyCount[] =
+    data.data?.userProfileUserQuestionSubmitStats?.acSubmissionNum || [];
+  const accepted: DifficultyCount[] =
+    data.data?.userProfileUserQuestionProgress?.numAcceptedQuestions || [];
+  const untouched: DifficultyCount[] =
+    data.data?.userProfileUserQuestionProgress?.numUntouchedQuestions || [];
 
-  const totalEasy =
-    allQuestions.find((q) => q.difficulty === "Easy")?.count || 0;
+  const findCount = (arr: DifficultyCount[], diff: string) =>
+    arr.find((s) => s.difficulty === diff)?.count || 0;
+
+  const easySolved = findCount(submitStats, "EASY");
+  const mediumSolved = findCount(submitStats, "MEDIUM");
+  const hardSolved = findCount(submitStats, "HARD");
+  const totalSolved = easySolved + mediumSolved + hardSolved;
+
+  const totalEasy = findCount(accepted, "EASY") + findCount(untouched, "EASY");
   const totalMedium =
-    allQuestions.find((q) => q.difficulty === "Medium")?.count || 0;
+    findCount(accepted, "MEDIUM") + findCount(untouched, "MEDIUM");
   const totalHard =
-    allQuestions.find((q) => q.difficulty === "Hard")?.count || 0;
-  const totalAll =
-    allQuestions.find((q) => q.difficulty === "All")?.count ||
-    totalEasy + totalMedium + totalHard;
+    findCount(accepted, "HARD") + findCount(untouched, "HARD");
+  const totalAll = totalEasy + totalMedium + totalHard;
 
   const acceptanceRate =
     totalAll > 0 ? Math.round((totalSolved / totalAll) * 10000) / 100 : 0;
@@ -88,8 +89,8 @@ export async function getLeetCodeStats(
     totalMedium,
     totalHard,
     acceptanceRate,
-    ranking: user.profile?.ranking || 0,
-    contributionPoints: user.profile?.reputation || 0,
+    ranking: 0,
+    contributionPoints: 0,
   };
 
   cache.set(cacheKey, stats);
