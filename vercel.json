@@ -1,0 +1,5 @@
+{
+  "buildCommand": "next build",
+  "framework": "nextjs",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- app/ components/ lib/ public/ package.json package-lock.json next.config.ts tsconfig.json .env.example"
+}
