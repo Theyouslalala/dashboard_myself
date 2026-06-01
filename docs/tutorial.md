@@ -216,3 +216,73 @@ A: 在 `lib/steam.ts`、`lib/github.ts`、`lib/leetcode.ts` 中修改 `CACHE_DUR
 ### Q: 手机访问样式错乱
 
 A: 项目使用 Tailwind 响应式前缀（`sm:` `md:` `lg:`），如遇到问题请检查浏览器宽度断点。
+
+---
+
+## 9. 微信小程序端
+
+### 架构设计
+
+小程序端使用 [Taro 4](https://taro.jd.com/) + React + TypeScript 构建，与 Web 端共享同一套后端 API。
+
+```
+小程序 → Taro.request → Vercel API → GitHub/Steam/LeetCode
+```
+
+### 为什么用 Taro 而不是原生开发
+
+- **React 范式** — 与 Next.js Web 端保持一致的开发体验
+- **TypeScript** — 全量类型安全
+- **跨端** — 一套代码可编译到微信/支付宝/抖音等多端
+- **工程化** — 内置构建优化、热更新、分包等能力
+
+### 关键实现
+
+#### Canvas 热力图
+
+小程序不支持 SVG，改用 Canvas 2D 手绘：
+
+1. 通过 `Taro.createSelectorQuery()` 获取 Canvas 节点
+2. 计算格子尺寸（按屏幕宽度自适应）
+3. 逐日绘制圆角矩形，颜色映射 level 0-4
+4. 高清适配：`canvas.width = displayWidth * dpr`
+
+#### Canvas 柱状图
+
+Steam Top 10 游戏时长柱状图也用 Canvas 2D：
+
+1. 渐变色填充（cyan → purple）
+2. 游戏名超长截断
+3. 时长格式化显示
+
+#### 请求层
+
+统一的 `request<T>(path)` 封装：
+- 泛型类型安全
+- 内存缓存（Map + 10 分钟 TTL）
+- 超时控制（10s）
+- 统一错误处理
+
+### 开发流程
+
+```bash
+cd miniapp
+npm install
+npm run dev:weapp
+```
+
+用微信开发者工具导入 `miniapp/dist` 目录，即可在模拟器中预览。
+
+### 配置说明
+
+| 文件 | 说明 |
+|------|------|
+| `src/services/request.ts` | 修改 `BASE_URL` 为你的 API 地址 |
+| `project.config.json` | 修改 `appid` 为你的小程序 AppID |
+| `config/index.ts` | Taro 构建配置 |
+
+### 添加新页面
+
+1. 在 `src/pages/` 下创建目录
+2. 创建 `index.tsx` 和 `index.scss`
+3. 在 `src/app.config.ts` 的 `pages` 数组中注册

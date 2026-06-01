@@ -1,0 +1,92 @@
+.steam-section {
+  .steam-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 32px;
+  }
+
+  .steam-stat {
+    text-align: center;
+  }
+
+  .steam-stat-num {
+    font-size: 36px;
+    font-weight: 700;
+    color: #a78bfa;
+    display: block;
+  }
+
+  .steam-stat-label {
+    font-size: 22px;
+    color: #94a3b8;
+    margin-top: 4px;
+    display: block;
+  }
+
+  .section-subtitle {
+    font-size: 26px;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .steam-chart {
+    margin-bottom: 32px;
+  }
+
+  .stats-chart-canvas {
+    border-radius: 12px;
+  }
+
+  .steam-games-scroll {
+    max-height: 600px;
+  }
+
+  .game-card {
+    display: flex;
+    padding: 20px 0;
+    border-bottom: 1px solid #1e293b;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .game-card-cover {
+    width: 184px;
+    height: 86px;
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+
+  .game-card-info {
+    margin-left: 20px;
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .game-card-name {
+    font-size: 26px;
+    font-weight: 600;
+    color: #f1f5f9;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .game-card-time {
+    font-size: 22px;
+    color: #a78bfa;
+    margin-top: 6px;
+  }
+
+  .game-card-last {
+    font-size: 20px;
+    color: #475569;
+    margin-top: 4px;
+  }
+}

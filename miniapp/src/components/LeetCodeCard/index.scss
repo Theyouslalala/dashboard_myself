@@ -1,0 +1,93 @@
+.leetcode-card {
+  .leetcode-overview {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+
+  .leetcode-total {
+    text-align: center;
+  }
+
+  .leetcode-total-num {
+    font-size: 56px;
+    font-weight: 700;
+    color: #fb923c;
+    display: block;
+  }
+
+  .leetcode-total-label {
+    font-size: 24px;
+    color: #94a3b8;
+    display: block;
+    margin-top: 4px;
+  }
+
+  .leetcode-meta {
+    display: flex;
+    gap: 32px;
+  }
+
+  .leetcode-meta-item {
+    text-align: center;
+  }
+
+  .meta-label {
+    font-size: 22px;
+    color: #94a3b8;
+    display: block;
+  }
+
+  .meta-value {
+    font-size: 30px;
+    font-weight: 600;
+    color: #f1f5f9;
+    display: block;
+    margin-top: 4px;
+  }
+
+  .leetcode-difficulties {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .difficulty-bar {
+    .difficulty-bar-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .difficulty-bar-label {
+      font-size: 26px;
+      font-weight: 600;
+    }
+
+    .difficulty-bar-count {
+      font-size: 24px;
+      color: #94a3b8;
+    }
+
+    .difficulty-bar-track {
+      height: 16px;
+      background: #1e293b;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .difficulty-bar-fill {
+      height: 100%;
+      border-radius: 8px;
+      transition: width 0.6s ease;
+    }
+
+    .difficulty-bar-pct {
+      font-size: 22px;
+      color: #94a3b8;
+      margin-top: 4px;
+      display: block;
+    }
+  }
+}
