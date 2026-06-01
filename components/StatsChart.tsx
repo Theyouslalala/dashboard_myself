@@ -57,7 +57,7 @@ export default function StatsChart({ games }: StatsChartProps) {
         <span className="text-xs font-mono text-slate-500 tracking-wider">TOP 10 BY PLAYTIME</span>
         <span className="text-[10px] text-slate-600 font-mono">HOURS</span>
       </div>
-      <ResponsiveContainer width="100%" height="90%">
+      <ResponsiveContainer width="100%" height={200} minWidth={0}>
         <BarChart
           data={top10}
           layout="vertical"
