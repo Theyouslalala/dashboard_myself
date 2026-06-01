@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import GitHubCard from "@/components/GitHubCard";
 import LeetCodeCard from "@/components/LeetCodeCard";
 import SteamSection from "@/components/SteamSection";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import type { DashboardMode } from "@/lib/types";
 
 const STEAM_MODES: DashboardMode[] = ["normal", "gaming"];
@@ -24,16 +25,22 @@ export default function Home() {
           : "grid-cols-1 lg:grid-cols-2"
       }`}>
         <div className="animate-fade-in-up" style={{ animationDelay: "100ms" }}>
-          <GitHubCard />
+          <ErrorBoundary>
+            <GitHubCard />
+          </ErrorBoundary>
         </div>
 
         <div className="animate-fade-in-up" style={{ animationDelay: "200ms" }}>
-          <LeetCodeCard />
+          <ErrorBoundary>
+            <LeetCodeCard />
+          </ErrorBoundary>
         </div>
 
         {showSteam && (
           <div className="animate-fade-in-up" style={{ animationDelay: "300ms" }}>
-            <SteamSection />
+            <ErrorBoundary>
+              <SteamSection />
+            </ErrorBoundary>
           </div>
         )}
       </div>

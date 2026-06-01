@@ -1,10 +1,25 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import type { SteamData } from "@/lib/types";
 import GameCard from "./GameCard";
-import StatsChart from "./StatsChart";
+import ErrorBoundary from "./ErrorBoundary";
+
+function StatsChartWrapper({ games }: { games: SteamData["games"] }) {
+  const [StatsChart, setStatsChart] = useState<React.ComponentType<{ games: SteamData["games"] }> | null>(null);
+
+  useEffect(() => {
+    import("./StatsChart").then((mod) => setStatsChart(() => mod.default));
+  }, []);
+
+  if (!StatsChart) {
+    return <div className="h-64 bg-slate-800/50 rounded-xl animate-pulse" />;
+  }
+
+  return <StatsChart games={games} />;
+}
 
 function StatBox({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
@@ -98,7 +113,9 @@ export default function SteamSection() {
 
       {/* Chart */}
       <div className="p-4 rounded-xl bg-slate-900/30 border border-slate-800/20">
-        <StatsChart games={games} />
+        <ErrorBoundary>
+          <StatsChartWrapper games={games} />
+        </ErrorBoundary>
       </div>
 
       {/* Game Cards */}
