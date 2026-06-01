@@ -72,6 +72,17 @@ export async function getGitHubRepos(
   return data;
 }
 
+function generateEmptyDays(): ContributionDay[] {
+  const days: ContributionDay[] = [];
+  const today = new Date();
+  for (let i = 364; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    days.push({ date: date.toISOString().split("T")[0], count: 0, level: 0 });
+  }
+  return days;
+}
+
 export async function getContributions(
   username: string,
   token?: string
@@ -111,34 +122,19 @@ export async function getContributions(
     signal: AbortSignal.timeout(10_000),
   });
 
-  // If GraphQL fails (no auth), generate empty data structure
   if (!res.ok) {
-    const days: ContributionDay[] = [];
-    const today = new Date();
-    for (let i = 364; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      days.push({
-        date: date.toISOString().split("T")[0],
-        count: 0,
-        level: 0,
-      });
-    }
-    return days;
+    const empty = generateEmptyDays();
+    contribCache.set(cacheKey, empty);
+    return empty;
   }
 
   const data = await res.json();
 
   if (data.errors?.length) {
-    console.warn("GitHub GraphQL errors (returning empty):", data.errors[0].message);
-    const days: ContributionDay[] = [];
-    const today = new Date();
-    for (let i = 364; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      days.push({ date: date.toISOString().split("T")[0], count: 0, level: 0 });
-    }
-    return days;
+    console.warn("GitHub GraphQL errors:", data.errors[0].message);
+    const empty = generateEmptyDays();
+    contribCache.set(cacheKey, empty);
+    return empty;
   }
   const weeks =
     data.data?.user?.contributionsCollection?.contributionCalendar?.weeks ||

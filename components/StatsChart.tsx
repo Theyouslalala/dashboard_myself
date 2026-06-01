@@ -89,7 +89,7 @@ export default function StatsChart({ games }: StatsChartProps) {
             }}
             formatter={(value, _name, props) => [
               `${value}h`,
-              (props.payload as { fullName?: string }).fullName || "",
+              (props.payload as Record<string, unknown>)?.fullName as string || "",
             ]}
           />
           <Bar dataKey="hours" radius={[0, 4, 4, 0]} barSize={16}>

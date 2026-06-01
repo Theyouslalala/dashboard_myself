@@ -105,7 +105,8 @@ export function getGameHeaderUrl(appid: number): string {
 export function formatPlaytime(minutes: number): string {
   if (minutes < 60) return `${minutes}min`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 100) return `${hours}h${minutes % 60}m`;
+  const mins = minutes % 60;
+  if (hours < 100) return mins > 0 ? `${hours}h${mins}m` : `${hours}h`;
   return `${hours}h`;
 }
 
